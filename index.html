@@ -310,6 +310,8 @@ body {
 }
 /* Last row in a group: no border */
 .record-row:last-child { border-bottom: none; }
+/* Has reply bubble below: remove separator */
+.record-item:has(.reply-bubble) .record-row { border-bottom: none; }
 
 /* Small connector tick: horizontal dash from axis to row */
 .record-row::before {
@@ -358,13 +360,27 @@ body {
 .record-delta.pos { color: var(--green); }
 .record-delta.neg { color: var(--red); }
 
+.record-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  flex-shrink: 0;
+  gap: 2px;
+}
+
 .record-running {
   font-size: 11px;
   color: var(--ink-3);
-  flex-shrink: 0;
   min-width: 26px;
   text-align: right;
   font-variant-numeric: tabular-nums;
+}
+
+.record-time {
+  font-size: 10px;
+  color: var(--ink-3);
+  letter-spacing: 0.2px;
+  margin-left: 5px;
 }
 
 
@@ -417,6 +433,154 @@ body {
   font-size: 14px;
 }
 
+/* ─── RECORD ITEM WRAPPER ──────────────────── */
+.record-item {
+  position: relative;
+}
+
+/* ─── REPLYABLE ROW ─────────────────────────── */
+.record-row.replyable {
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: background 0.15s;
+  border-radius: 8px;
+  margin: 0 -8px;
+  padding-left: 8px;
+  padding-right: 8px;
+}
+.record-row.replyable:hover {
+  background: rgba(155, 111, 173, 0.06);
+}
+.record-row.replyable:active {
+  background: rgba(155, 111, 173, 0.13);
+}
+
+/* ─── REPLY BUBBLE ─────────────────────────── */
+.reply-bubble {
+  margin: 0 0 6px 39px; /* align with record-desc (28px icon + 11px gap) */
+  padding: 9px 12px 8px;
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: 4px 12px 12px 12px;
+  position: relative;
+  animation: replyAppear 0.32s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* tiny triangle pointing up-left */
+.reply-bubble::before {
+  content: '';
+  position: absolute;
+  top: -6px;
+  left: 10px;
+  width: 10px;
+  height: 6px;
+  background: var(--line);
+  clip-path: polygon(0% 100%, 50% 0%, 100% 100%);
+}
+.reply-bubble::after {
+  content: '';
+  position: absolute;
+  top: -5px;
+  left: 11px;
+  width: 8px;
+  height: 5px;
+  background: var(--bg);
+  clip-path: polygon(0% 100%, 50% 0%, 100% 100%);
+}
+
+.reply-text {
+  font-size: 13px;
+  color: var(--ink-2);
+  line-height: 1.5;
+  word-break: break-all;
+}
+
+.reply-meta {
+  font-size: 10px;
+  color: var(--ink-3);
+  margin-top: 4px;
+  text-align: right;
+  letter-spacing: 0.2px;
+}
+
+@keyframes replyAppear {
+  from { opacity: 0; transform: translateY(-6px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* ─── REPLY SHEET ──────────────────────────── */
+.reply-record-summary {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 10px 12px;
+  background: var(--bg);
+  border-radius: 11px;
+  margin-bottom: 16px;
+  border: 1px solid var(--line);
+}
+
+.reply-summary-icon {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  flex-shrink: 0;
+}
+.reply-summary-icon.pos { background: var(--green-bg); }
+.reply-summary-icon.neg { background: var(--red-bg); }
+
+.reply-summary-desc {
+  flex: 1;
+  font-size: 13px;
+  color: var(--ink-2);
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.reply-summary-score {
+  font-size: 13px;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+.reply-summary-score.pos { color: var(--green); }
+.reply-summary-score.neg { color: var(--red); }
+
+textarea.reply-input {
+  width: 100%;
+  border: 1px solid var(--line);
+  border-radius: 11px;
+  padding: 12px 13px;
+  font-size: 15px;
+  font-family: inherit;
+  color: var(--ink);
+  background: var(--bg);
+  outline: none;
+  resize: none;
+  height: 96px;
+  transition: border-color 0.15s;
+  -webkit-appearance: none;
+  line-height: 1.5;
+}
+textarea.reply-input:focus {
+  border-color: var(--grad-b);
+  background: var(--surface);
+}
+
+.reply-char-count {
+  text-align: right;
+  font-size: 11px;
+  color: var(--ink-3);
+  margin-top: 4px;
+  transition: color 0.15s;
+}
+.reply-char-count.warn { color: var(--red); }
+
 .export-link {
   display: block;
   text-align: center;
@@ -437,14 +601,14 @@ body {
   z-index: 20;
   background: var(--surface);
   border-top: 1px solid var(--line);
-  padding: 0 20px calc(10px + var(--safe-bottom));
+  padding: 0 20px;
 }
 
 .add-trigger {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 14px 0;
+  padding: 14px 0 calc(14px + var(--safe-bottom));
   cursor: pointer;
   color: var(--ink-3);
   font-size: 15px;
@@ -981,6 +1145,30 @@ body.intro-done #timelineEl {
 </div>
 
 
+<!-- REPLY OVERLAY -->
+<div class="overlay" id="replyOverlayEl" onclick="closeReplySheet()"></div>
+
+<!-- REPLY SHEET -->
+<div class="sheet" id="replySheetEl">
+  <div class="sheet-handle"></div>
+  <div class="sheet-head">回复这条记录</div>
+
+  <div class="reply-record-summary" id="replySummaryEl">
+    <div class="reply-summary-icon" id="replySummaryIcon">❤️</div>
+    <div class="reply-summary-desc" id="replySummaryDesc"></div>
+    <div class="reply-summary-score" id="replySummaryScore"></div>
+  </div>
+
+  <div class="field">
+    <label class="field-label">你的回复</label>
+    <textarea class="reply-input" id="replyInputEl" placeholder="写下你的回应…" maxlength="100"
+      oninput="onReplyInput()"></textarea>
+    <div class="reply-char-count" id="replyCharCountEl">0 / 100</div>
+  </div>
+
+  <button class="submit-btn" onclick="submitReply()">发送回复</button>
+</div>
+
 <!-- WISH CARD -->
 <div id="wishEl" style="display:none" class="wish-bg" onclick="closeWish()">
   <div class="wish-card">
@@ -1044,6 +1232,92 @@ function setSel(v) {
 
 function stepScore(d) { setSel(sel+d); }
 function quickScore(v) { setSel(v); }
+
+/* ─── Reply ──────────────────────────────── */
+let replyTargetId = null;
+
+function openReplySheet(recordId) {
+  const rec = appState.records.find(r => r.id === recordId);
+  if (!rec || rec.reply) return;
+  replyTargetId = recordId;
+
+  const pos = rec.score > 0;
+  document.getElementById('replySummaryIcon').textContent = pos ? '❤️' : '💔';
+  document.getElementById('replySummaryIcon').className = 'reply-summary-icon ' + (pos ? 'pos' : 'neg');
+  document.getElementById('replySummaryDesc').textContent = rec.desc;
+  const sign = pos ? '+' : '';
+  document.getElementById('replySummaryScore').textContent = sign + rec.score;
+  document.getElementById('replySummaryScore').className = 'reply-summary-score ' + (pos ? 'pos' : 'neg');
+
+  const input = document.getElementById('replyInputEl');
+  input.value = '';
+  document.getElementById('replyCharCountEl').textContent = '0 / 100';
+  document.getElementById('replyCharCountEl').classList.remove('warn');
+
+  document.getElementById('replyOverlayEl').classList.add('open');
+  document.getElementById('replySheetEl').classList.add('open');
+  setTimeout(() => input.focus(), 120);
+}
+
+function closeReplySheet() {
+  document.getElementById('replyOverlayEl').classList.remove('open');
+  document.getElementById('replySheetEl').classList.remove('open');
+  document.getElementById('replyInputEl').blur();
+  replyTargetId = null;
+}
+
+function onReplyInput() {
+  const len = document.getElementById('replyInputEl').value.length;
+  const el = document.getElementById('replyCharCountEl');
+  el.textContent = len + ' / 100';
+  el.classList.toggle('warn', len >= 90);
+}
+
+async function submitReply() {
+  const text = document.getElementById('replyInputEl').value.trim();
+  if (!text)          { toast('请写下你的回复');   return; }
+  if (!replyTargetId) { return; }
+
+  const id = replyTargetId;
+  closeReplySheet();
+  toast('发送中…');
+
+  try {
+    const res  = await fetch(API, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'reply', id, reply: text }),
+    });
+    if (res.status === 409) { toast('该记录已有回复'); return; }
+    if (!res.ok)            { toast('发送失败'); return; }
+    const data = await res.json();
+    appState = data;
+    render(false);
+    toast('回复已发送');
+  } catch(e) {
+    // offline: update locally
+    const rec = appState.records.find(r => r.id === id);
+    if (rec && !rec.reply) {
+      rec.reply = { text, time: new Date().toISOString() };
+      render(false);
+      toast('回复已记录（离线模式）');
+    }
+  }
+}
+
+function fmtRecordTime(iso) {
+  const d = new Date(iso);
+  return String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
+}
+
+function fmtReplyTime(iso) {
+  const d = new Date(iso);
+  const mo = d.getMonth() + 1;
+  const da = d.getDate();
+  const hh = String(d.getHours()).padStart(2, '0');
+  const mm = String(d.getMinutes()).padStart(2, '0');
+  return `${mo}-${da} ${hh}:${mm}`;
+}
 
 /* ─── Sheet ──────────────────────────────── */
 function openSheet() {
@@ -1181,11 +1455,31 @@ function renderTimeline(records, animateFirst, isIntro) {
       const delay = (gi===0 && ri===0 && animateFirst) ? 'animation-delay:.05s' : 'animation:none';
       const icon = pos ? '❤️' : '💔';
       const sign = pos ? '+' : '';
-      return `<div class="record-row" style="${delay}">
-        <div class="row-icon ${pos?'pos':'neg'}">${icon}</div>
-        <div class="record-desc">${esc(r.desc)}</div>
-        <div class="record-delta ${pos?'pos':'neg'}">${sign}${r.score}</div>
-        <div class="record-running">${r.running}</div>
+
+      // reply bubble (if exists)
+      const replyHtml = r.reply
+        ? `<div class="reply-bubble">
+            <div class="reply-text">${esc(r.reply.text)}</div>
+            <div class="reply-meta">${fmtReplyTime(r.reply.time)}</div>
+          </div>`
+        : '';
+
+      const replyable = !r.reply;
+      const rowClass  = replyable ? 'record-row replyable' : 'record-row';
+      const rowClick  = replyable ? `onclick="openReplySheet('${r.id}')"` : '';
+
+      const recTime = fmtRecordTime(new Date(+r.id).toISOString());
+
+      return `<div class="record-item">
+        <div class="${rowClass}" style="${delay}" ${rowClick}>
+          <div class="row-icon ${pos?'pos':'neg'}">${icon}</div>
+          <div class="record-desc">${esc(r.desc)}<span class="record-time">${recTime}</span></div>
+          <div class="record-right">
+            <div class="record-delta ${pos?'pos':'neg'}">${sign}${r.score}</div>
+            <div class="record-running">${r.running}</div>
+          </div>
+        </div>
+        ${replyHtml}
       </div>`;
     }).join('');
     // Intro stagger: groups appear one by one after timeline container fades in
@@ -1274,11 +1568,11 @@ document.addEventListener('DOMContentLoaded', async ()=>{
 
   // 从服务器加载数据，再触发入场动画
   const SAMPLE_DATA = { records: [
-    { id: '1745000000001', date: '2026-04-01', desc: '主动帮忙做了家务',         score:  3 },
-    { id: '1745000000002', date: '2026-04-03', desc: '约好了时间却临时放鸽子',   score: -2 },
+    { id: '1745000000001', date: '2026-04-01', desc: '主动帮忙做了家务',         score:  3, reply: { text: '辛苦了，爱你～', time: '2026-04-01T21:00:00' } },
+    { id: '1745000000002', date: '2026-04-03', desc: '约好了时间却临时放鸽子',   score: -2, reply: { text: '下次提前说好吗，我等了好久…', time: '2026-04-03T19:30:00' } },
     { id: '1745000000003', date: '2026-04-05', desc: '送了一束花，超级浪漫',     score:  3 },
     { id: '1745000000004', date: '2026-04-10', desc: '吵架了，说了不好听的话',   score: -3 },
-    { id: '1745000000005', date: '2026-04-10', desc: '主动道歉并认真反思',       score:  2 },
+    { id: '1745000000005', date: '2026-04-10', desc: '主动道歉并认真反思',       score:  2, reply: { text: '看到你道歉的态度，心里好很多了', time: '2026-04-10T22:15:00' } },
     { id: '1745000000006', date: '2026-04-15', desc: '记住了纪念日并提前准备',   score:  3 },
     { id: '1745000000007', date: '2026-04-20', desc: '玩游戏忘记回消息',         score: -1 },
     { id: '1745000000008', date: '2026-04-28', desc: '一起做了顿好吃的晚餐',     score:  2 },
@@ -1345,6 +1639,11 @@ document.addEventListener('DOMContentLoaded', async ()=>{
   document.getElementById('inputDesc').addEventListener('keydown', e=>{
     if(e.key==='Enter')  addRecord();
     if(e.key==='Escape') closeSheet();
+  });
+
+  document.getElementById('replyInputEl').addEventListener('keydown', e=>{
+    if(e.key==='Escape') closeReplySheet();
+    if(e.key==='Enter' && (e.metaKey || e.ctrlKey)) submitReply();
   });
 });
 </script>
