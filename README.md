@@ -86,6 +86,15 @@
 
 ---
 
+## 语言版本 · Language Versions
+
+| 版本 · Version | 文件 · File |
+|----------------|-------------|
+| 中文 · Chinese | [`index.html`](index.html) |
+| English | [`index.en.html`](index.en.html) |
+
+---
+
 ## 快速开始 · Quick Start
 
 ### 静态预览 · Static Preview（无需服务器 · no server required）
